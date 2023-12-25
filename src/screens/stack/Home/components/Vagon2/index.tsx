@@ -6,7 +6,6 @@ import {
   Animated,
   Easing,
   Dimensions,
-  Alert,
 } from 'react-native';
 import React, {useEffect, useState} from 'react';
 
@@ -45,102 +44,73 @@ const VagonTwo: React.FC<VagonProps> = ({activeIndex}) => {
 
   const animatedColorValue = new Animated.Value(0);
 
- useEffect(() => {}, [selectedSeat]);
+  useEffect(() => {}, [selectedSeat]);
 
- useEffect(() => {
-  // Animation for wagon highlight
-  const animation = Animated.loop(
-    Animated.sequence([
-      Animated.timing(animatedColorValue, {
-        toValue: 1,
-        duration: 1000,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }),
-      Animated.timing(animatedColorValue, {
-        toValue: 0,
-        duration: 1500,
-        easing: Easing.linear,
-        useNativeDriver: false,
-      }),
-    ])
-  );
-
-  if (isAnimationRunning) {
-    animation.start();
-  } else {
-    animation.stop();
-  }
-
-  return () => animation.stop();
-}, [activeIndex, isAnimationRunning]);
-
-const animatedBackgroundColor = animatedColorValue.interpolate({
-  inputRange: [0, 1],
-  outputRange: [colors.white, colors.lightgrey],
-});
-
-const scrollX = new Animated.Value(0);
-
-useEffect(() => {
-  let animation: Animated.CompositeAnimation;
-
-  const startScrollAnimation = () => {
-    animation = Animated.loop(
-      Animated.timing(scrollX, {
-        toValue: 6,
-        duration: 20000,
-        easing: Easing.linear,
-        useNativeDriver: true,
-      })
+  useEffect(() => {
+    // Animation for wagon highlight
+    const animation = Animated.loop(
+      Animated.sequence([
+        Animated.timing(animatedColorValue, {
+          toValue: 1,
+          duration: 1000,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+        Animated.timing(animatedColorValue, {
+          toValue: 0,
+          duration: 1500,
+          easing: Easing.linear,
+          useNativeDriver: false,
+        }),
+      ]),
     );
+    if (isAnimationRunning) {
+      animation.start();
+    } else {
+      animation.stop();
+    }
 
-    animation.start();
-  };
+    return () => animation.stop();
+  }, [activeIndex, isAnimationRunning]);
 
-  const stopScrollAnimation = () => {
-    animation.stop();
-  };
+  const animatedBackgroundColor = animatedColorValue.interpolate({
+    inputRange: [0, 1],
+    outputRange: [colors.white, colors.lightgrey],
+  });
 
-  if (isAnimationRunning) {
-    startScrollAnimation();
-  } else {
-    stopScrollAnimation();
-  }
+  const scrollX = new Animated.Value(0);
 
-  return () => {
-    stopScrollAnimation();
-  };
-}, [isAnimationRunning, scrollX]);
+  useEffect(() => {
+    const scrollAnimation = Animated.timing(scrollX, {
+      toValue: 3,
+      duration: 10000, // Adjust the duration as needed
+      easing: Easing.linear,
+      useNativeDriver: true,
+    });
 
-const translateX = scrollX.interpolate({
-  inputRange: [0, 1],
-  outputRange: [-width / 5, width / 4],
-});
+    Animated.loop(scrollAnimation).start();
+
+    return () => {
+      scrollX.setValue(0);
+      scrollAnimation.stop();
+    };
+  }, [scrollX]);
+
+  const translateX = scrollX.interpolate({
+    inputRange: [0, 1],
+    outputRange: [-width / 5, width / 4], // Adjust the distance based on your text length
+  });
 
   const onSeatSelect = (item: ISeat) => {
-    if (!selectedSeats.find(x => x.id === item?.id)) {
-      // Check if the selected seats exceed the limit (e.g., 10 seats) when adding a new seat
-      if (selectedSeats.length >= 10) {
-        // You can show a message to the user or take any other action
-        Alert.alert('You can only select up to 10 seats.');
-        return;
-      }
-    }
-  
     if (selectedSeats.find(x => x.id === item?.id)) {
-      // If the seat is already selected, unselect it
       setSelectedSeats(x => [...x.filter(x => x.id !== item?.id)]);
     } else {
-      // If the seat is not selected, select it
       setVisible(true);
       setSelectedSeat(item);
       // Pause animation when the modal is about to open
       setIsAnimationRunning(false);
     }
   };
-  
-  
 
   const onPressGender = (type: number) => {
     if (selectedSeat) {
@@ -349,7 +319,7 @@ const translateX = scrollX.interpolate({
               <View style={styles.restaurant}>
                 <View style={styles.innerRestaurant}>
                   <Animated.View
-                    style={{transform: [{translateX}], width: height * 3.7}}>
+                    style={{transform: [{translateX}], width: height *3}}>
                     <Text style={styles.coffeText} numberOfLines={1}>
                       -- Train Cafe -- Coffee & Snacks -- Train Cafe -- Coffee &
                       Snacks -- Train Cafe -- Coffee & Snacks -- Train Cafe --
@@ -358,15 +328,7 @@ const translateX = scrollX.interpolate({
                       -- Train Cafe -- Coffee & Snacks -- Train Cafe -- Coffee &
                       Snacks -- Train Cafe -- Coffee & Snacks -- Train Cafe
                       --Coffee & Snacks -- Train Cafe -- Coffee & Snacks --
-                      Train Cafe -- Coffee & Snacks -- Train Cafe --Coffee &
-                      Snacks -- Train Cafe -- Coffee & Snacks -- Train Cafe --
-                      Coffee & Snacks -- Train Cafe -- Coffee & Snacks -- Train
-                      Cafe -- Coffee & Snacks -- Train Cafe -- Coffee & Snacks
-                      -- Train Cafe -- Coffee & Snacks -- Train Cafe -- Coffee &
-                      Snacks -- Train Cafe -- Coffee & Snacks -- Train Cafe --
-                      Coffee & Snacks -- Train Cafe --Coffee & Snacks -- Train
-                      Cafe -- Coffee & Snacks -- Train Cafe -- Coffee & Snacks
-                      -- Train Cafe --
+                      Train Cafe -- Coffee & Snacks -- Train Cafe --
                     </Text>
                   </Animated.View>
                 </View>
